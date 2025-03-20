@@ -4,15 +4,14 @@ sommet(b).
 sommet(c).
 sommet(d).
 sommet(e).
+sommet(f).
 
 arc(a, b, 4).
 arc(a, c, 2).
-arc(a, e, 2).
-arc(b, c, 5).
+arc(a, f, 4).
 arc(b, d, 6).
-arc(b, e, 4).
 arc(c, d, 3).
-arc(d, e, 3).
+arc(d, e, 2).
 
 % Fonctions de base
 degre_sortant(Sommet, D) :- 
@@ -36,23 +35,48 @@ tous_les_sommets(Sommets) :-
 
 % Les algorithmes de coloration
 %Algo01 : Welsh-Powell
-
-tri_decroissant(Sommets, SommetsTries) :-
+tri_decroissant_WP(Sommets, SommetsTries) :-
     findall(D-S, (member(S, Sommets), degre(S, D)), Paires), 
     sort(0, @>=, Paires, Triees),
     findall(S, member(_-S, Triees), SommetsTries).         
 
-couleur_valide(Sommet, Couleur, Attributions) :-
-    \+ (arc(Sommet, Voisin, _), member(Voisin-Couleur, Attributions)),
-    \+ (arc(Voisin, Sommet, _), member(Voisin-Couleur, Attributions)).
+couleur_valide(Sommet, Couleur, Affectations) :-
+    \+ (arc(Sommet, Voisin, _), member(Voisin-Couleur, Affectations)),
+    \+ (arc(Voisin, Sommet, _), member(Voisin-Couleur, Affectations)).
 
-assigner_couleur([], _, []). % Si la liste des sommets est vide, la coloration l est aussi
-assigner_couleur([S|Reste], Attributions, [(S-Couleur)|Autres]) :-
+assigner_couleur_WP([], _, []). % Si la liste des sommets est vide, la coloration l est aussi
+assigner_couleur_WP([S|Reste], Affectations, [(S-Couleur)|Autres]) :-
     between(1, 100, Couleur),
-    couleur_valide(S, Couleur, Attributions),
-    assigner_couleur(Reste, [(S-Couleur)|Attributions], Autres), !.
+    couleur_valide(S, Couleur, Affectations),
+    assigner_couleur_WP(Reste, [(S-Couleur)|Affectations], Autres), !.
 
 welsh_powell(Coloration) :-
     tous_les_sommets(Sommets),
-    tri_decroissant(Sommets, SommetsTries),
-    assigner_couleur(SommetsTries, [], Coloration).
+    tri_decroissant_WP(Sommets, SommetsTries),
+    assigner_couleur_WP(SommetsTries, [], Coloration).
+
+%Algo02 : D-SATUR
+degre_saturation(S, Affectations, DS) :-
+    voisins(S, Voisins),
+    findall(C, (member(V, Voisins), member(V-C, Affectations)), Couleurs),
+    sort(Couleurs, CouleursTriees),
+    length(CouleursTriees, DS).
+
+tri_decroissant_DS(Sommets, Affectations, SommetsTries) :-
+    findall(DS-D-S, (member(S, Sommets), 
+                     degre_saturation(S, Affectations, DS), 
+                     degre(S, D)), Paires),
+    sort(0, @>=, Paires, Triees),
+    findall(S, member(_-_ - S, Triees), SommetsTries).
+
+assigner_couleur_DS([], _, []).  
+assigner_couleur_DS(Sommets, Affectations, [(S-C)|Autres]) :-
+    tri_decroissant_DS(Sommets, Affectations, [S|_]), 
+    between(1, 100, C),
+    couleur_valide(S, C, Affectations), !,
+    select(S, Sommets, NouveauxSommets),
+    assigner_couleur_DS(NouveauxSommets, [(S-C)|Affectations], Autres).
+
+d_satur(Coloration) :-
+    tous_les_sommets(Sommets),
+    assigner_couleur_DS(Sommets, [], Coloration), !. 
