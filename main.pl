@@ -80,3 +80,13 @@ assigner_couleur_DS(Sommets, Affectations, [(S-C)|Autres]) :-
 d_satur(Coloration) :-
     tous_les_sommets(Sommets),
     assigner_couleur_DS(Sommets, [], Coloration), !. 
+
+% Les algorithmes de recherche d arbres couvrants minimaux
+%Algo03 : Prim
+
+%Algo04 : Kruskal
+
+% Les algorithmes de recherche du plus court chemin
+%Algo05 : Dijkstra
+
+%Algo06 : Bellman-Ford 
