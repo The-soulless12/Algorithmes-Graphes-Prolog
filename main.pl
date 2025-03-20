@@ -92,12 +92,18 @@ prim_recursif(SommetsVisites, ArbresActuels, Arbre) :- % Sinon il faut ajouter l
     findall(Poids-U-V,
             (member(U, SommetsVisites), arc(U, V, Poids), \+ member(V, SommetsVisites)),
             ArcsPossibles),
-    sort(ArcsPossibles, [_-Umin-Vmin|_]),
-    prim_recursif([Vmin|SommetsVisites], [arc(Umin, Vmin, _)|ArbresActuels], Arbre).
+    sort(ArcsPossibles, [PoidsMin-Umin-Vmin|_]),
+    prim_recursif([Vmin|SommetsVisites], [arc(Umin, Vmin, PoidsMin)|ArbresActuels], Arbre).
 
-prim(Arbre) :-
+cout_total([], 0).  
+cout_total([arc(_, _, Poids)|Reste], Somme) :-  
+    cout_total(Reste, SommeReste),  
+    Somme is Poids + SommeReste.
+
+prim(Arbre, Cout) :-
     tous_les_sommets([Depart|_]),
-    prim_recursif([Depart], [], Arbre).
+    prim_recursif([Depart], [], Arbre),
+    cout_total(Arbre, Cout).
 
 %Algo04 : Kruskal
 
