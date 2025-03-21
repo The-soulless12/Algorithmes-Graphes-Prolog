@@ -75,10 +75,12 @@ prim_recursif(SommetsVisites, Arbres, Arbres) :- % Si tous les sommets sont couv
     subset(Tous, SommetsVisites). % On verifie si tous les sommets ont dejà ete visites
 
 prim_recursif(SommetsVisites, ArbresActuels, Arbre) :- % Sinon il faut ajouter l arete de poids minimal
-    % Retourne toutes les aretes reliant un sommet dejà visite à un sommet non visite
+    % On retourne toutes les aretes reliant un sommet dejà visite à un sommet non visite
     findall(Poids-U-V,
-            (member(U, SommetsVisites), arc(U, V, Poids), \+ member(V, SommetsVisites)),
-            ArcsPossibles),
+        (member(U, SommetsVisites),
+         (arc(U, V, Poids) ; arc(V, U, Poids)), % On prend en compte les deux sens de l arc
+         \+ member(V, SommetsVisites)),
+        ArcsPossibles),
     sort(ArcsPossibles, [PoidsMin-Umin-Vmin|_]),
     prim_recursif([Vmin|SommetsVisites], [arc(Umin, Vmin, PoidsMin)|ArbresActuels], Arbre).
 
