@@ -2,11 +2,11 @@
 sommet(a). sommet(b). sommet(c).
 sommet(d). sommet(e). sommet(f).
 
-arc(a, b, 2). arc(a, c, 2). arc(a, f, 4).
-arc(b, d, 2). arc(b, e, 2).
+arc(a, b, 4). arc(a, c, 3). arc(a, f, 5).
+arc(b, d, 3). arc(b, e, 2). 
 arc(c, d, 3). arc(c, f, 4).
-arc(d, e, 2).
-arc(f, b, 1).
+arc(d, e, 2). arc(d, f, 3).
+arc(f, b, 1). 
 
 % Règles de base
 degre(Sommet, Degre) :-
@@ -61,7 +61,7 @@ assigner_couleur_DS(Sommets, Affectations, [(S-C)|Autres]) :-
     tri_decroissant_DS(Sommets, Affectations, [S|_]), 
     between(1, 100, C),
     couleur_valide(S, C, Affectations),
-    select(S, Sommets, NouveauxSommets),
+    select(S, Sommets, NouveauxSommets), % On retire S de la liste des sommets
     assigner_couleur_DS(NouveauxSommets, [(S-C)|Affectations], Autres), !.
 
 d_satur(Coloration) :-
@@ -95,8 +95,34 @@ prim(Arbre, Cout) :-
     cout_total(Arbre, Cout), !. % On ne retourne que la solution optimale
 
 %Algo04 : Kruskal
+trouver_racine(X, Parents, Rep) :-
+    member(X-Y, Parents), !, 
+    trouver_racine(Y, Parents, Rep).
+trouver_racine(X, _, X).  % Si X n a pas de parent, il est sa propre racine
+
+fusion(X, Y, Parents, [RepX-RepY | Parents]) :-
+    trouver_racine(X, Parents, RepX),
+    trouver_racine(Y, Parents, RepY),
+    RepX \= RepY.
+fusion(_, _, Parents, Parents).
+
+kruskal_recursif([], _, Arbre, Arbre).
+kruskal_recursif([Poids-U-V | Arcs], Parents, ArbreActuel, ArbreFinal) :-
+    trouver_racine(U, Parents, RepU),
+    trouver_racine(V, Parents, RepV),
+    RepU \= RepV, !,
+    fusion(U, V, Parents, Nouveau),
+    kruskal_recursif(Arcs, Nouveau, [arc(U, V, Poids) | ArbreActuel], ArbreFinal).
+kruskal_recursif([_ | Arcs], Parents, ArbreActuel, ArbreFinal) :-
+    kruskal_recursif(Arcs, Parents, ArbreActuel, ArbreFinal).
+
+kruskal(Arbre, Cout) :-
+    findall(Poids-U-V, (arc(U, V, Poids) ; arc(V, U, Poids)), Arcs),
+    sort(Arcs, ArcsTries),
+    kruskal_recursif(ArcsTries, [], [], Arbre),
+    cout_total(Arbre, Cout), !. % On ne retourne que la solution optimale
 
 % Les algorithmes de recherche du plus court chemin
 %Algo05 : Dijkstra
 
-%Algo06 : Bellman-Ford 
+%Algo06 : Bellman-Ford
