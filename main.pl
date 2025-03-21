@@ -6,12 +6,15 @@ sommet(d).
 sommet(e).
 sommet(f).
 
-arc(a, b, 4).
+arc(a, b, 2).
 arc(a, c, 2).
 arc(a, f, 4).
-arc(b, d, 6).
+arc(b, d, 2).
+arc(b, e, 2).
 arc(c, d, 3).
+arc(c, f, 4).
 arc(d, e, 2).
+arc(f, b, 1).
 
 % Fonctions de base
 degre_sortant(Sommet, D) :- 
@@ -30,7 +33,7 @@ degre(Sommet, D) :-
 voisins(Sommet, Voisins) :-
     findall(V, arc(Sommet, V, _), Voisins).
 
-tous_les_sommets(Sommets) :-
+get_sommets(Sommets) :-
     findall(S, sommet(S), Sommets).
 
 % Les algorithmes de coloration
@@ -51,7 +54,7 @@ assigner_couleur_WP([S|Reste], Affectations, [(S-Couleur)|Autres]) :-
     assigner_couleur_WP(Reste, [(S-Couleur)|Affectations], Autres), !.
 
 welsh_powell(Coloration) :-
-    tous_les_sommets(Sommets),
+    get_sommets(Sommets),
     tri_decroissant_WP(Sommets, SommetsTries),
     assigner_couleur_WP(SommetsTries, [], Coloration).
 
@@ -78,13 +81,13 @@ assigner_couleur_DS(Sommets, Affectations, [(S-C)|Autres]) :-
     assigner_couleur_DS(NouveauxSommets, [(S-C)|Affectations], Autres).
 
 d_satur(Coloration) :-
-    tous_les_sommets(Sommets),
+    get_sommets(Sommets),
     assigner_couleur_DS(Sommets, [], Coloration), !. 
 
-% Les algorithmes de recherche d arbres couvrants minimaux
+% Les algorithmes de recherche d arbres couvrants de poids minimal
 %Algo03 : Prim
 prim_recursif(SommetsVisites, Arbres, Arbres) :- % Si tous les sommets sont couverts
-    tous_les_sommets(Tous),
+    get_sommets(Tous),
     subset(Tous, SommetsVisites). % On vérifie si tous les sommets ont déjà été visités
 
 prim_recursif(SommetsVisites, ArbresActuels, Arbre) :- % Sinon il faut ajouter l arête de poids minimal
@@ -101,9 +104,9 @@ cout_total([arc(_, _, Poids)|Reste], Somme) :-
     Somme is Poids + SommeReste.
 
 prim(Arbre, Cout) :-
-    tous_les_sommets([Depart|_]),
+    get_sommets([Depart|_]),
     prim_recursif([Depart], [], Arbre),
-    cout_total(Arbre, Cout).
+    cout_total(Arbre, Cout), !. % On ne retourne que la solution optimale
 
 %Algo04 : Kruskal
 
