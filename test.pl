@@ -1,6 +1,10 @@
 % Définition du graphe (sommets & arcs)
-sommet(a). sommet(b). sommet(c).
-sommet(d). sommet(e). sommet(f).
+sommet(a).
+sommet(b).
+sommet(c).
+sommet(d).
+sommet(e).
+sommet(f).
 
 arc(a, b, 2). arc(a, c, 2). arc(a, f, 4).
 arc(b, d, 2). arc(b, e, 2).
@@ -8,14 +12,22 @@ arc(c, d, 3). arc(c, f, 4).
 arc(d, e, 2).
 arc(f, b, 1).
 
-% Règles de base
-degre(Sommet, Degre) :-
-    findall(1, (arc(Sommet, _, _); arc(_, Sommet, _)), L),
-    length(L, Degre).
+% Fonctions de base
+degre_sortant(Sommet, D) :- 
+    findall(_, arc(Sommet, _, _), L), 
+    length(L, D).
+
+degre_entrant(Sommet, D) :- 
+    findall(_, arc(_, Sommet, _), L), 
+    length(L, D).
+
+degre(Sommet, D) :-
+    degre_sortant(Sommet, D1),
+    degre_entrant(Sommet, D2),
+    D is D1 + D2.
 
 voisins(Sommet, Voisins) :-
-    findall(V, (arc(Sommet, V, _); arc(V, Sommet, _)), ListeVoisins),
-    sort(ListeVoisins, Voisins).
+    findall(V, arc(Sommet, V, _), Voisins).
 
 get_sommets(Sommets) :-
     findall(S, sommet(S), Sommets).
@@ -28,8 +40,8 @@ tri_decroissant_WP(Sommets, SommetsTries) :-
     findall(S, member(_-S, Triees), SommetsTries).         
 
 couleur_valide(Sommet, Couleur, Affectations) :-
-    voisins(Sommet, Voisins),
-    \+ (member(V, Voisins), member(V-Couleur, Affectations)).
+    \+ (arc(Sommet, Voisin, _), member(Voisin-Couleur, Affectations)),
+    \+ (arc(Voisin, Sommet, _), member(Voisin-Couleur, Affectations)).
 
 assigner_couleur_WP([], _, []). % Si la liste des sommets est vide, la coloration l est aussi
 assigner_couleur_WP([S|Reste], Affectations, [(S-Couleur)|Autres]) :-
@@ -60,9 +72,9 @@ assigner_couleur_DS([], _, []).  % Si la liste des sommets est vide, la colorati
 assigner_couleur_DS(Sommets, Affectations, [(S-C)|Autres]) :-
     tri_decroissant_DS(Sommets, Affectations, [S|_]), 
     between(1, 100, C),
-    couleur_valide(S, C, Affectations),
+    couleur_valide(S, C, Affectations), !,
     select(S, Sommets, NouveauxSommets),
-    assigner_couleur_DS(NouveauxSommets, [(S-C)|Affectations], Autres), !.
+    assigner_couleur_DS(NouveauxSommets, [(S-C)|Affectations], Autres).
 
 d_satur(Coloration) :-
     get_sommets(Sommets),
@@ -91,10 +103,3 @@ prim(Arbre, Cout) :-
     get_sommets([Depart|_]),
     prim_recursif([Depart], [], Arbre),
     cout_total(Arbre, Cout), !. % On ne retourne que la solution optimale
-
-%Algo04 : Kruskal
-
-% Les algorithmes de recherche du plus court chemin
-%Algo05 : Dijkstra
-
-%Algo06 : Bellman-Ford 
