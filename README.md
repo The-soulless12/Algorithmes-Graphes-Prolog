@@ -13,6 +13,6 @@ Implémentation d’algorithmes de graphes en Prolog, permettant de trouver le p
 - SWI-Prolog.
 
 # Note
-- Pour exécuter le projet, ouvrez un terminal et saisissez `swipl` puis chargez le fichier avec la requête `[main].`. Lancez ensuite les requêtes suivantes avec : `welsh_powell(Coloration).`, `d_satur(Coloration).`, `prim(Arbre, Cout).`, `kruskal(Arbre, Cout).` et `dijkstra(Depart, Arrivee, Chemin, Cout).`.
+- Pour exécuter le projet, ouvrez un terminal et saisissez la commande `swipl` puis chargez le fichier avec la requête `[main].`. Lancez ensuite les requêtes suivantes : `welsh_powell(Coloration).`, `d_satur(Coloration).`, `prim(Arbre, Cout).`, `kruskal(Arbre, Cout).` et `dijkstra(Depart, Arrivee, Chemin, Cout).`.
 - Les arguments **Coloration**, **Arbre**, **Cout** et **Chemin** peuvent être remplacés par des variables, qui doivent obligatoirement commencer par une majuscule. En revanche, **Depart** et **Arrivee** doivent être des sommets existants, représentés par des lettres minuscules parmi **{a, b, c, d, e, f}**.
-- Pour quitter Prolog, saisissez `halt.` dans votre terminal.
+- Pour quitter Prolog, saisissez la requête `halt.` dans votre terminal.
