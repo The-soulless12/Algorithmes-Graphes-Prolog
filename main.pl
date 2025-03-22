@@ -3,7 +3,7 @@ sommet(a). sommet(b). sommet(c).
 sommet(d). sommet(e). sommet(f).
 
 arc(a, b, 4). arc(a, c, 3). arc(a, f, 5).
-arc(b, d, 3). arc(b, e, 2). 
+arc(b, d, 1). arc(b, e, 2). 
 arc(c, d, 3). arc(c, f, 4).
 arc(d, e, 2). arc(d, f, 3).
 arc(f, b, 1). 
@@ -20,7 +20,7 @@ voisins(Sommet, Voisins) :-
 get_sommets(Sommets) :-
     findall(S, sommet(S), Sommets).
 
-% Les algorithmes de coloration
+% Les algorithmes de coloration de graphe
 %Algo01 : Welsh-Powell
 tri_decroissant_WP(Sommets, SommetsTries) :-
     findall(D-S, (member(S, Sommets), degre(S, D)), Paires), 
@@ -122,7 +122,34 @@ kruskal(Arbre, Cout) :-
     kruskal_recursif(ArcsTries, [], [], Arbre),
     cout_total(Arbre, Cout), !. % On ne retourne que la solution optimale
 
-% Les algorithmes de recherche du plus court chemin
+% L algorithme de recherche du plus court chemin
 %Algo05 : Dijkstra
+init_distances([], _, []).
+init_distances([S|R], Depart, [(S, 0)|Distances]) :- S == Depart, !, init_distances(R, Depart, Distances).
+init_distances([S|R], Depart, [(S, inf)|Distances]) :- init_distances(R, Depart, Distances).
 
-%Algo06 : Bellman-Ford
+maj_distances([], _, _, []).
+maj_distances([(S, D)|Rest], Sommet, Cout, [(S, ND)|NewRest]) :-
+    (  arc(Sommet, S, Poids) ; arc(S, Sommet, Poids) ),
+    ND is min(D, Cout + Poids), 
+    maj_distances(Rest, Sommet, Cout, NewRest).
+maj_distances([(S, D)|Rest], Sommet, Cout, [(S, D)|NewRest]) :-
+    maj_distances(Rest, Sommet, Cout, NewRest).
+
+dijkstra_recursif([(Arrivee, Cout, Chemin)|_], _, Arrivee, Chemin, Cout) :- !.
+dijkstra_recursif([(Sommet, Cout, Chemin)|Restes], Distances, Arrivee, FinalChemin, FinalCout) :-
+    findall((Voisin, NouveauCout, [Voisin|Chemin]),
+            (   (arc(Sommet, Voisin, Poids) ; arc(Voisin, Sommet, Poids)),
+                \+ member(Voisin, Chemin),
+                NouveauCout is Cout + Poids
+            ),
+            Nouveaux),
+    maj_distances(Distances, Sommet, Cout, NouvellesDistances),
+    append(Restes, Nouveaux, Tous),
+    sort(2, @=<, Tous, Tri), 
+    dijkstra_recursif(Tri, NouvellesDistances, Arrivee, FinalChemin, FinalCout).
+
+dijkstra(Depart, Arrivee, Chemin, Cout) :-
+    get_sommets(Sommets),
+    init_distances(Sommets, Depart, Distances),
+    dijkstra_recursif([(Depart, 0, [Depart])], Distances, Arrivee, Chemin, Cout), !.
